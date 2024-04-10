@@ -1,62 +1,66 @@
-using PlayFab.ClientModels;
-using PlayFab.Internal;
-using PlayFab;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Mintzuworks.Domain;
-using System.Web;
 
 namespace Mintzuworks.Network
 {
     public static class PrototypeAPI
     {
-        public const string BaseURL = "http://localhost:8080/";
+        private const string BaseURL = "http://localhost:8080/";
 
         #region Title-Wide Management URL
-        public const string GetPingURL = "ping";
-        public const string GetServerTimeURL = "time";
-        public const string GetAllTitleDataURL = "titleDatas";
-        public const string GetAllNewsURL = "news";
+        private const string GetPingURL = "ping";
+        private const string GetServerTimeURL = "time";
+        private const string GetAllExternalTitleDataURL = "titleDatas/external";
+        private const string GetAllInternalTitleDataURL = "titleDatas/internal";
+        private const string GetExternalTitleDataURL = "titleData/external";
+        private const string GetInternalTitleDataURL = "titleData/internal";
+        private const string GetAllActiveNewsURL = "news/active";
         #endregion
 
         #region Authentication URL
-        public const string SignUpCustomURL = "signup";
-        public const string LoginCustomURL = "login";
-        public const string LoginGuestURL = "login/guest";
-        public const string AuthGoogleURL = "auth/google";
-        public const string AuthAppleURL = "auth/apple";
-        public const string RefreshTokenURL = "refresh";
-        public const string SocialLoginURL = "auth/social/login";
-        public const string SocialLinkingURL = "auth/social/connect";
-        public const string SocialUnlinkingURL = "auth/social/disconnect";
+        private const string SignUpCustomURL = "signup";
+        private const string LoginCustomURL = "login";
+        private const string LoginGuestURL = "login/guest";
+        private const string AuthGoogleURL = "auth/google";
+        private const string AuthAppleURL = "auth/apple";
+        private const string RefreshTokenURL = "refresh";
+        private const string SocialLoginURL = "auth/social/login";
+        private const string SocialLinkingURL = "auth/social/connect";
+        private const string SocialUnlinkingURL = "auth/social/disconnect";
+        private const string CheckEmailValidityURL = "validator/userEmail";
+        private const string SendResetPasswordURL = "resetpass/send";
+        #endregion
+
+        #region Email Verification URL
+        private const string CheckEmailAvailibilityURL = "emailverificaton/check";
+        private const string SendEmailVerificationCodeURL = "emailverificaton/send";
+        private const string HandleEmailVerificationCodeURL = "emailverificaton/handle";
         #endregion
 
         #region User Management URL
-        public const string LinkCustomLoginWithCodeURL = "user/link/custom/code/handle";
-        public const string SendCustomLoginCodeForLinkingURL = "user/link/custom/code/send";
-        public const string LinkCustomLoginWithVerifierURL = "user/link/custom/verifier";
-        public const string GetUserInfoURL = "user/info";
-        public const string GetBanInfoURL = "user/banInfo";
-        public const string GetLinkedAccountsURL = "user/linkedAccounts";
-        public const string GetGameDataURL = "user/gameData";
-        public const string GetClaimedCouponsURL = "user/claimedCoupons";
-        public const string GetInventoryURL = "user/inventory";
-        public const string GetPurchaseHistoryURL = "user/purchaseHistory";
-        public const string GetLeaderboardDataURL = "user/leaderboardData";
-        public const string GetMailInboxURL = "user/mailInbox";
-        public const string GetPrizeTableProgressionURL = "user/prizeTableProgression";
-        public const string UpdateDisplayNameURL = "user/displayName";
-        public const string UpdateGameDataByKeyURL = "user/gameData";
+        private const string LinkCustomLoginURL = "user/link/custom";
+        private const string GetUserInfoURL = "user/info";
+        private const string GetBanInfoURL = "user/banInfo";
+        private const string GetLinkedAccountsURL = "user/linkedAccounts";
+        private const string GetCustomDataURL = "user/customData";
+        private const string GetClaimedCouponsURL = "user/claimedCoupons";
+        private const string GetInventoryURL = "user/inventory";
+        private const string GetPurchaseHistoryURL = "user/purchaseHistory";
+        private const string GetLeaderboardDataURL = "user/leaderboardData";
+        private const string GetMailInboxURL = "user/mailInbox";
+        private const string GetPrizeTableProgressionURL = "user/prizeTableProgression";
+        private const string UpdateDisplayNameURL = "user/displayName";
+        private const string UpdateCustomDataByKeyURL = "user/customData";
         #endregion
 
         #region Item Management URL 
-        public const string AddItemURL = "item/add/id";
-        public const string SubstractItemURL = "item/substract/id";
-        public const string BuyItemURL = "item/buy/id";
-        public const string SellItemURL = "item/sell/id";
-        public const string DrawPrizeURL = "prizeTable/draw";
+        private const string AddItemURL = "item/add/id";
+        private const string SubstractItemURL = "item/substract/id";
+        private const string SubstractItemInstanceURL = "item/substract/instance";
+        private const string BuyItemURL = "item/buy/id";
+        private const string SellItemURL = "item/sell/id";
+        private const string DrawPrizeURL = "prizeTable/draw";
         #endregion
 
         #region Title-Wide Management API
@@ -70,21 +74,32 @@ namespace Mintzuworks.Network
             PrototypeHttp.Get(BaseURL + GetServerTimeURL, OnSuccess, OnError, useOAuth: false);
         }
 
-        public static void GetAllTitleData(Action<GetServerTimeResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void GetAllExternalTitleData(Action<GetServerTimeResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Get(BaseURL + GetAllTitleDataURL, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Get(BaseURL + GetAllExternalTitleDataURL, OnSuccess, OnError, useOAuth: false);
         }
-        
-        public static void GetAllNews(Action<GetServerTimeResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void GetAllInternalTitleData(Action<GetTitleDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Get(BaseURL + GetAllNewsURL, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Get(BaseURL + GetAllInternalTitleDataURL, OnSuccess, OnError, useOAuth: false);
+        }
+        public static void GetExternalTitleData(GetTitleDataRequest request, Action<GetTitleDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + GetExternalTitleDataURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+        public static void GetInternalTitleData(GetTitleDataRequest request, Action<GetTitleDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + GetInternalTitleDataURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+        public static void GetAllNews(Action<GetNewsDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Get(BaseURL + GetAllActiveNewsURL, OnSuccess, OnError, useOAuth: false);
         }
         #endregion
 
         #region Authentication API
         public static void SignUpCustom(LoginCustomRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Post(BaseURL + LoginCustomURL, request, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Post(BaseURL + SignUpCustomURL, request, OnSuccess, OnError, useOAuth: false);
         }
         public static void LoginCustom(LoginCustomRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
@@ -94,9 +109,9 @@ namespace Mintzuworks.Network
         {
             PrototypeHttp.Post(BaseURL + LoginGuestURL, request, OnSuccess, OnError, useOAuth: false);
         }
-        public static void RefreshAccessToken(LoginCustomRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void RefreshAccessToken(RefreshTokenRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Post(BaseURL + LoginCustomURL, request, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Post(BaseURL + RefreshTokenURL, request, OnSuccess, OnError, useOAuth: false);
         }
 
         public static void LoginGoogle(Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -166,22 +181,38 @@ namespace Mintzuworks.Network
         {
             PrototypeHttp.Post(BaseURL + SocialUnlinkingURL, request, OnSuccess, OnError, useOAuth: false);
         }
+
+        public static void CheckEmailValidity(EmailRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + CheckEmailValidityURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+        public static void SendResetPassword(EmailRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + SendResetPasswordURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+        #endregion
+
+        #region Email Verification API
+        public static void CheckEmailAvailability(EmailRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + CheckEmailAvailibilityURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+
+        public static void SendEmailVerificationCode(EmailVerificationRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + SendEmailVerificationCodeURL, request, OnSuccess, OnError, useOAuth: false);
+        }
+
+        public static void HandleEmailVerificationCode(EmailVerificationRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + HandleEmailVerificationCodeURL, request, OnSuccess, OnError, useOAuth: false);
+        }
         #endregion
 
         #region User Management API
-        public static void LinkCustomLoginWithCode(LinkCustomLoginRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void LinkCustomLogin(LinkCustomLoginRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Post(BaseURL + LinkCustomLoginWithCodeURL, request, OnSuccess, OnError);
-        }
-
-        public static void SendCustomLoginCodeForLinking(LinkCustomLoginRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
-        {
-            PrototypeHttp.Post(BaseURL + SendCustomLoginCodeForLinkingURL, request, OnSuccess, OnError);
-        }
-
-        public static void LinkCustomLoginWithVerifier(LinkCustomLoginRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
-        {
-            PrototypeHttp.Post(BaseURL + LinkCustomLoginWithVerifierURL, request, OnSuccess, OnError);
+            PrototypeHttp.Post(BaseURL + LinkCustomLoginURL, request, OnSuccess, OnError);
         }
 
         public static void GetUserInfo(Action<GetUserInfoResult> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -199,9 +230,9 @@ namespace Mintzuworks.Network
             PrototypeHttp.Get(BaseURL + GetLinkedAccountsURL, OnSuccess, OnError);
         }
 
-        public static void GetGameData(Action<GetGameDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void GetCustomData(Action<GetCustomDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Get(BaseURL + GetGameDataURL, OnSuccess, OnError);
+            PrototypeHttp.Get(BaseURL + GetCustomDataURL, OnSuccess, OnError);
         }
 
         public static void GetClaimedCoupons(Action<GetClaimedCouponsResult> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -241,7 +272,7 @@ namespace Mintzuworks.Network
 
         public static void UpdateGameDataByKey(UpdateGameDataByKeyRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Put(BaseURL + UpdateGameDataByKeyURL, request, OnSuccess, OnError);
+            PrototypeHttp.Put(BaseURL + UpdateCustomDataByKeyURL, request, OnSuccess, OnError);
         }
         #endregion
 
@@ -254,6 +285,11 @@ namespace Mintzuworks.Network
         public static void SubstractItem(ItemManagementRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
             PrototypeHttp.Post(BaseURL + SubstractItemURL, request, OnSuccess, OnError);
+        }
+
+        public static void SubstractItemInstance(ItemManagementRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + SubstractItemInstanceURL, request, OnSuccess, OnError);
         }
 
         public static void BuyItem(ItemManagementRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)

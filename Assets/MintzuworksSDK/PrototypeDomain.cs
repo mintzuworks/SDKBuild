@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using PlayFab.EconomyModels;
 using System;
 using System.Collections;
@@ -16,6 +17,12 @@ namespace Mintzuworks.Domain
     public class GeneralResult : CommonResult
     {
         public string message;
+    }
+
+    [System.Serializable]
+    public class GeneralResultWithData : CommonResult
+    {
+        public object data;
     }
 
     [System.Serializable]
@@ -45,11 +52,37 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
+    public class GetTitleDataRequest
+    {
+        public List<string> keys;
+    }
+    [System.Serializable]
+    public class GetTitleDataResult : CommonResult
+    {
+        public Dictionary<string, object> titleDataValues;
+    }
+
+    [System.Serializable]
+    public class NewsData
+    {
+        [JsonProperty("_id")]
+        public string ID;
+        public string title;
+        public string body;
+        public DateTime createdDate;
+        public bool status;
+    }
+    [System.Serializable]
+    public class GetNewsDataResult : CommonResult
+    {
+        public List<NewsData> data;
+    }
+
+    [System.Serializable]
     public class LinkCustomLoginRequest
     {
         public string email;
         public string password;
-        public string code;
     }
 
     [System.Serializable]
@@ -67,7 +100,7 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
-    public class GetGameDataResult : CommonResult
+    public class GetCustomDataResult : CommonResult
     {
         public Dictionary<string, string> gameData;
     }
@@ -75,8 +108,10 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class InventoryData
     {
-        public string instanceId;
-        public string item; 
+        [JsonProperty("instanceId")]
+        public string instanceID;
+        public string item;
+        public string itemID;
         public int amount;
         public Dictionary<string, object> customJson;
         public DateTime lastUpdateAt;
@@ -85,7 +120,7 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class GetInventoryResult : CommonResult
     {
-        public List<InventoryData> inventory;
+        public List<InventoryData> data;
     }
 
     [System.Serializable]
@@ -146,9 +181,26 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
+    public class RefreshTokenRequest
+    {
+        public string refreshToken;
+    }
+
+    [System.Serializable]
+    public class EmailVerificationRequest
+    {
+        public string email;
+        public string code;
+    }
+    [System.Serializable]
+    public class EmailRequest
+    {
+        public string email;
+    }
+    [System.Serializable]
     public class GuestLoginRequest
     {
-        public string deviceId;
+        public string deviceID;
     }
 
     [System.Serializable]
@@ -174,6 +226,7 @@ namespace Mintzuworks.Domain
         public string displayName;
         public string email;
         public string region;
+        public string lastDeviceID;
         public DateTime createdAt;
         public DateTime lastUpdateAt;
     }
@@ -189,8 +242,11 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class ErrorResult
     {
-        public long HttpCode;
-        public string Error;
+        [JsonProperty("HttpCode")]
+        public long httpCode;
+        [JsonProperty("Error")]
+        public string error;
+        public string message;
     }
 
     [System.Serializable]

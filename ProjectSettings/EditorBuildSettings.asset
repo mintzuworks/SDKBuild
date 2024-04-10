@@ -6,6 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/MintzuworksSDK/Example/Scenes/LoadingScreen.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/MintzuworksSDK/Example/Scenes/AuthScreen.unity
+    guid: c4b72a7a0df128f46a0b4cac66f32c1d
+  - enabled: 1
+    path: Assets/MintzuworksSDK/Example/Scenes/UserScreen.unity
+    guid: b4ec94687de50e34e906562526b598eb
+  - enabled: 1
+    path: Assets/MintzuworksSDK/Example/Scenes/ItemScreen.unity
+    guid: f9cf8885ee64e104cb1c6f3724e8ac76
   m_configObjects: {}

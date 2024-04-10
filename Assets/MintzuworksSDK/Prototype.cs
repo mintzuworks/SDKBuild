@@ -10,29 +10,17 @@ namespace Mintzuworks
 {
     public class Prototype : MonoBehaviour
     {
-        public string AccessToken;
-        public string RefreshToken;
-
         [Button]
         public void TestLogin()
         {
             PrototypeAPI.LoginGuest(new GuestLoginRequest()
             {
-                deviceId = SystemInfo.deviceUniqueIdentifier,
+                deviceID = SystemInfo.deviceUniqueIdentifier,
             }, 
             (result) =>
             {
-                Debug.Log(JsonConvert.SerializeObject(result));
-                AccessToken = result.accessToken;
-                RefreshToken = result.refreshToken;
-                if (PrototypeHttp.Headers.ContainsKey("Authorization"))
-                {
-                    PrototypeHttp.Headers["Authorization"] = $"Bearer {AccessToken}";
-                }
-                else
-                {
-                    PrototypeHttp.Headers.TryAdd("Authorization", $"Bearer {AccessToken}");
-                }
+                PrototypeHttp.accessToken = result.accessToken;
+                PrototypeHttp.refreshToken = result.refreshToken;
             },
             (error) =>
             {
