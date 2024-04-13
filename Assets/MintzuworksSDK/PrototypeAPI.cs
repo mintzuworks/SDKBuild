@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 using Mintzuworks.Domain;
+using Newtonsoft.Json;
+using System.Text;
+using UnityEditor.PackageManager.Requests;
 
 namespace Mintzuworks.Network
 {
@@ -25,9 +28,8 @@ namespace Mintzuworks.Network
         private const string AuthGoogleURL = "auth/google";
         private const string AuthAppleURL = "auth/apple";
         private const string RefreshTokenURL = "refresh";
-        private const string SocialLoginURL = "auth/social/login";
-        private const string SocialLinkingURL = "auth/social/connect";
-        private const string SocialUnlinkingURL = "auth/social/disconnect";
+        private const string VerifySocialLoginURL = "auth/pool/login";
+        private const string VerifySocialLinkURL = "auth/pool/link";
         private const string CheckEmailValidityURL = "validator/userEmail";
         private const string SendResetPasswordURL = "resetpass/send";
         #endregion
@@ -40,12 +42,14 @@ namespace Mintzuworks.Network
 
         #region User Management URL
         private const string LinkCustomLoginURL = "user/link/custom";
+        private const string SocialUnlinkingURL = "user/unlink";
         private const string GetUserInfoURL = "user/info";
         private const string GetBanInfoURL = "user/banInfo";
         private const string GetLinkedAccountsURL = "user/linkedAccounts";
         private const string GetCustomDataURL = "user/customData";
         private const string GetClaimedCouponsURL = "user/claimedCoupons";
         private const string GetInventoryURL = "user/inventory";
+        private const string GetInventoryAggregateURL = "user/inventory/aggregate";
         private const string GetPurchaseHistoryURL = "user/purchaseHistory";
         private const string GetLeaderboardDataURL = "user/leaderboardData";
         private const string GetMailInboxURL = "user/mailInbox";
@@ -62,6 +66,13 @@ namespace Mintzuworks.Network
         private const string SellItemURL = "item/sell/id";
         private const string DrawPrizeURL = "prizeTable/draw";
         #endregion
+
+        #region IAP URL
+        private const string ValidatePlayStoreTransactionURL = "iap/validate/playStore";
+        private const string ValidateAppStoreTransactionURL = "iap/validate/appStore";
+        private const string InitiatePaypalOrderURL = "iap/paypal/initiate";
+        #endregion
+
 
         #region Title-Wide Management API
         public static void GetPing(Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -116,40 +127,45 @@ namespace Mintzuworks.Network
 
         public static void LoginGoogle(Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            Application.OpenURL(BaseURL + AuthGoogleURL);
-            Application.deepLinkActivated += (url) => OnSocialLoginCallbackReceived(url, OnSuccess, OnError);
+            //Encode
+            var request = new StartAuthenticationRequest()
+            {
+                deviceID = SystemInfo.deviceUniqueIdentifier,
+                eventName = "login"
+            };
+            string json = JsonConvert.SerializeObject(request);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            string base64Encoded = Convert.ToBase64String(bytes);
+            Application.OpenURL(BaseURL + AuthGoogleURL + "?data=" + base64Encoded);
         }
 
         public static void LoginApple(Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            Application.OpenURL(BaseURL + AuthAppleURL);
-            Application.deepLinkActivated += (url) => OnSocialLoginCallbackReceived(url, OnSuccess, OnError);
-        }
-
-        private static void OnSocialLoginCallbackReceived(string deeplinkURL,
-            Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
-        {
-            Application.deepLinkActivated -= (url) => OnSocialLoginCallbackReceived(url, OnSuccess, OnError);
-            string[] parts = deeplinkURL.Split('?');
-            if (parts.Length > 1)
+            //Encode
+            var request = new StartAuthenticationRequest()
             {
-                string token = parts[1];
-                SocialLogin(new SocialLoginRequest()
-                {
-                    token = token
-                });
-            }
+                deviceID = SystemInfo.deviceUniqueIdentifier,
+                eventName = "login"
+            };
+            string json = JsonConvert.SerializeObject(request);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            string base64Encoded = Convert.ToBase64String(bytes);
+            Application.OpenURL(BaseURL + AuthAppleURL + "?data=" + base64Encoded);
         }
 
-        public static void LinkGoogle(Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void LinkGoogle(StartAuthenticationRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            Application.OpenURL(BaseURL + AuthAppleURL);
-            Application.deepLinkActivated += (url) => OnSocialLinkingCallbackReceived(url, OnSuccess, OnError);
+            string json = JsonConvert.SerializeObject(request);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            string base64Encoded = Convert.ToBase64String(bytes);
+            Application.OpenURL(BaseURL + AuthGoogleURL + "?data=" + base64Encoded);
         }
-        public static void LinkApple(Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void LinkApple(StartAuthenticationRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            Application.OpenURL(BaseURL + AuthAppleURL);
-            Application.deepLinkActivated += (url) => OnSocialLinkingCallbackReceived(url, OnSuccess, OnError);
+            string json = JsonConvert.SerializeObject(request);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            string base64Encoded = Convert.ToBase64String(bytes);
+            Application.OpenURL(BaseURL + AuthAppleURL + "?data=" + base64Encoded);
         }
 
         private static void OnSocialLinkingCallbackReceived(string deeplinkURL,
@@ -160,26 +176,17 @@ namespace Mintzuworks.Network
             if (parts.Length > 1)
             {
                 string token = parts[1];
-                SocialLinking(new SocialLinkingRequest()
-                {
-                    token = token
-                });
             }
         }
 
-        private static void SocialLogin(SocialLoginRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void SocialLogin(SocialLoginRequest request, Action<LoginResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Post(BaseURL + SocialLoginURL, request, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Post(BaseURL + VerifySocialLoginURL, request, OnSuccess, OnError, useOAuth: false);
         }
 
-        private static void SocialLinking(SocialLinkingRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void SocialLink(SocialLoginRequest request, Action<CheckSocialRedisLinkResponse> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Post(BaseURL + SocialLinkingURL, request, OnSuccess, OnError, useOAuth: false);
-        }
-
-        public static void SocialUnlinking(SocialUnlinkingRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
-        {
-            PrototypeHttp.Post(BaseURL + SocialUnlinkingURL, request, OnSuccess, OnError, useOAuth: false);
+            PrototypeHttp.Post(BaseURL + VerifySocialLinkURL, request, OnSuccess, OnError, useOAuth: false);
         }
 
         public static void CheckEmailValidity(EmailRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -215,6 +222,11 @@ namespace Mintzuworks.Network
             PrototypeHttp.Post(BaseURL + LinkCustomLoginURL, request, OnSuccess, OnError);
         }
 
+        public static void SocialUnlinking(SocialUnlinkingRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + SocialUnlinkingURL, request, OnSuccess, OnError);
+        }
+
         public static void GetUserInfo(Action<GetUserInfoResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
             PrototypeHttp.Get(BaseURL + GetUserInfoURL, OnSuccess, OnError);
@@ -243,6 +255,11 @@ namespace Mintzuworks.Network
         public static void GetInventory(Action<GetInventoryResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
             PrototypeHttp.Get(BaseURL + GetInventoryURL, OnSuccess, OnError);
+        }
+
+        public static void GetInventoryAggregate(Action<GetInventoryResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Get(BaseURL + GetInventoryAggregateURL, OnSuccess, OnError);
         }
 
         public static void GetPurchaseHistory(Action<GetPurchaseHistoryResult> OnSuccess = null, Action<ErrorResult> OnError = null)
@@ -305,6 +322,30 @@ namespace Mintzuworks.Network
         public static void DrawPrize(DrawPrizeRequest request, Action<DrawPrizeResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
             PrototypeHttp.Post(BaseURL + DrawPrizeURL, request, OnSuccess, OnError);
+        }
+        #endregion
+
+        #region IAP API
+        public static void ValidatePlayStoreTransaction(ValidatePlayStoreRequest request, Action<ValidatePlayStoreResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + ValidatePlayStoreTransactionURL, request, OnSuccess, OnError);
+        }
+        public static void ValidateAppStoreTransaction(ValidateAppStoreRequest request, Action<ValidateAppStoreResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + ValidateAppStoreTransactionURL, request, OnSuccess, OnError);
+        }
+        public static void InitiatePaypalOrder(InitiatePaypalOrderRequest request, Action<InitiatePaypalOrderResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post<InitiatePaypalOrderRequest, InitiatePaypalOrderResult>(BaseURL + InitiatePaypalOrderURL, request,
+                (result) =>
+                {
+                    OnSuccess?.Invoke(result);
+
+                    if(!string.IsNullOrEmpty(result.orderID))
+                    {
+                        Application.OpenURL($"https://www.sandbox.paypal.com/checkoutnow?token={result.orderID}");
+                    }
+                }, OnError);
         }
         #endregion
     }

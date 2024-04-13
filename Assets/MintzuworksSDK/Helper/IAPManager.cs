@@ -8,50 +8,81 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using UnityEngine.Networking;
 using Utilities.WebRequestRest;
+using UnityEngine.UI;
+using UnityEngine.Purchasing.Security;
+using Sirenix.OdinInspector.Editor.Validation;
+using static Unity.VisualScripting.Dependencies.Sqlite.SQLite3;
+using Mintzuworks.Network;
+using Mintzuworks.Domain;
+using System;
+using UnityEngine.SceneManagement;
 
 public class IAPManager : MonoBehaviour, IDetailedStoreListener
 {
+    public TMPro.TMP_InputField productInput;
+    public Button btnBuyPlayStore;
+    public Button btnBuyAppStore;
+    public Button btnInitiatePaypalOrder;
+    public Button btnCheckPaypalState;
+    public Button btnBack;
     IStoreController m_StoreController;
-
-    public string consumable = "test_consumable";
-    public string nonConsumable = "test_nonconsumable";
-    public string subscription = "test_subscription";
+    IAppleExtensions m_AppleExtensions;
 
     int m_ProcessingPurchasesCount;
 
-    void Start()
+    private void Start()
     {
-        InitializePurchasing();
+        btnBuyPlayStore.onClick.AddListener(BuyProductPlaystore);
+        btnBuyAppStore.onClick.AddListener(BuyProductApple);
+        btnInitiatePaypalOrder.onClick.AddListener(OnClickInitiatePaypalOrder);
+        btnCheckPaypalState.onClick.AddListener(OnClickCheckPaypalState);
+        btnBack.onClick.AddListener(OnClickBack);
+    }
+
+    private void OnClickBack()
+    {
+        SceneManager.LoadScene("UserScreen");
+    }
+
+    private void OnClickInitiatePaypalOrder()
+    {
+        PrototypeAPI.InitiatePaypalOrder(new InitiatePaypalOrderRequest
+        {
+            productID = productInput.text
+        }, OnError: OnGeneralError);
+    }
+
+    public void OnGeneralError(ErrorResult error)
+    {
+        Debug.LogError($"[{error.httpCode}] -> {error.message}");
+    }
+    private void OnClickCheckPaypalState()
+    {
     }
 
     void InitializePurchasing()
     {
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-
-        builder.AddProduct(consumable, ProductType.Consumable);
-        builder.AddProduct(nonConsumable, ProductType.NonConsumable);
-        builder.AddProduct(subscription, ProductType.Subscription);
-
+        builder.AddProduct(productInput.text, ProductType.NonConsumable);
         UnityPurchasing.Initialize(this, builder);
     }
 
-    public void BuyConsumable()
+    void BuyProductPlaystore()
     {
-        m_StoreController.InitiatePurchase(consumable);
+        InitializePurchasing();
+        m_StoreController.InitiatePurchase(productInput.text);
     }
-    public void BuyNonConsumable()
+
+    void BuyProductApple()
     {
-        m_StoreController.InitiatePurchase(nonConsumable);
-    }
-    public void BuySubscription()
-    {
-        m_StoreController.InitiatePurchase(subscription);
+        InitializePurchasing();
+        m_StoreController.InitiatePurchase(productInput.text);
     }
 
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
-        Debug.Log("In-App Purchasing successfully initialized");
         m_StoreController = controller;
+        m_AppleExtensions = extensions.GetExtension<IAppleExtensions>();
     }
 
     public void OnInitializeFailed(InitializationFailureReason error)
@@ -75,7 +106,6 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
     {
         //Retrieve the purchased product
         var product = args.purchasedProduct;
-
         StartCoroutine(BackEndValidation(product));
 
         //We return Pending, informing IAP to keep the transaction open while we validate the purchase on our side.
@@ -94,12 +124,38 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
             $" Purchase failure details: {failureDescription.message}");
     }
 
-    public TMPro.TMP_InputField ipAddress;
-    string URL => $"{ipAddress.text}/iap/validate/playstore";
-
     IEnumerator BackEndValidation(Product product)
     {
         Debug.Log(JsonConvert.SerializeObject(product));
+
+        //If IOS >= 7
+        var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+        // Get a reference to IAppleConfiguration during IAP initialization.
+        var appleConfig = builder.Configure<IAppleConfiguration>();
+
+        byte[] receiptData = null;
+        try
+        {
+            receiptData = System.Convert.FromBase64String(appleConfig.appReceipt);
+            Debug.Log("Receipt is base64 encoded.");
+        }
+        catch (System.FormatException)
+        {
+            Debug.Log("Receipt is not base64 encoded.");
+        }
+
+        string receiptDataIos7 = string.Empty;
+        if (receiptData != null)
+            receiptDataIos7 = receiptData.ToString();
+        
+        if (receiptDataIos7 == "")
+        {
+            //If IOS < 7
+            var receiptTest = m_AppleExtensions.GetTransactionReceiptForProduct(product);
+            Debug.Log(receiptTest);
+
+        }
+        AppleReceipt receipt = new AppleValidator(AppleTangle.Data()).Validate(receiptData);
         var receiptObj = JsonConvert.DeserializeObject<JObject>(product.receipt);
         if (!TryGetValue(receiptObj, "Payload", out string payloadJson)) yield break;
         var payloadObj = JsonConvert.DeserializeObject<JObject>(payloadJson);
@@ -117,7 +173,8 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         Debug.Log("Product ID : " + productId);
         Debug.Log("Purchase Token : " + purchaseToken);
 
-        var requestData = new PlayStoreVerifyRequest()
+
+        var requestData = new ValidatePlayStoreRequest
         {
             package = packageName,
             productID = productId,
@@ -125,26 +182,18 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         };
 
         var jsonData = JsonConvert.SerializeObject(requestData);
-
-        // Start the async operation
-        var task = Rest.PostAsync(URL, jsonData);
-        yield return new WaitUntil(() => task.IsCompleted);
-        Rest.Validate(task.Result, true);
-
-        if(task.Result.Successful)
+        PrototypeAPI.ValidatePlayStoreTransaction(requestData, (result) =>
         {
-            Debug.Log("Validation request sent successfully");
-            Debug.Log($"Server response: {task.Result}");
-        }
-        else
+            Debug.Log(result);
+        });
+
+        PrototypeAPI.ValidateAppStoreTransaction(new ValidateAppStoreRequest()
         {
-            Debug.LogError($"Err Server response: {task.Result}");
-        }
-
-        m_ProcessingPurchasesCount++;
-
-        Debug.Log($"Confirming purchase of {product.definition.id}");
-        m_StoreController.ConfirmPendingPurchase(product);
+            receiptData = receiptDataIos7
+        }, (result) =>
+        {
+            Debug.Log(result);
+        });
     }
 
     bool TryGetValue(JObject obj, string key, out string value)
@@ -157,12 +206,4 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         }
         else return false;
     }
-}
-
-[System.Serializable]
-public class PlayStoreVerifyRequest
-{
-    public string package;
-    public string productID;
-    public string purchaseToken;
 }

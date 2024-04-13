@@ -28,6 +28,7 @@ namespace Mintzuworks.Example
 
         public Button btnLoginGoogle;
         public Button btnLoginApple;
+        public Button btnVerifySocialAuth;
 
         public Transform loginWidget;
         public TextMeshProUGUI playerName;
@@ -52,6 +53,18 @@ namespace Mintzuworks.Example
             btnLoginGoogle.onClick.AddListener(OnClickLoginGoogle);
             btnLoginApple.onClick.AddListener(OnClickLoginApple);
             btnGoToUser.onClick.AddListener(OnClickGoToUser);
+            btnVerifySocialAuth.onClick.AddListener(OnClickVerifySocialAuth);
+        }
+
+        private void OnClickVerifySocialAuth()
+        {
+            PrototypeAPI.SocialLogin(new SocialLoginRequest()
+            {
+                id = SystemInfo.deviceUniqueIdentifier,
+            }, (result) =>
+            {
+                ProcessLogin(result);
+            }, OnGeneralError);
         }
 
         private void OnClickGoToUser()
@@ -64,7 +77,8 @@ namespace Mintzuworks.Example
             PrototypeAPI.LoginGuest(
                 new GuestLoginRequest()
                 {
-                    deviceID = inputDeviceID.text
+                    deviceID = inputDeviceID.text,
+                    autoSignup = true
                 },
                 (result) =>
                 {
@@ -167,8 +181,10 @@ namespace Mintzuworks.Example
             );
         }
 
+        bool isThirdPartyLogin;
         private void OnClickLoginGoogle()
         {
+            isThirdPartyLogin = true;
             PrototypeAPI.LoginGoogle(
                 (result) =>
                 {
@@ -180,6 +196,7 @@ namespace Mintzuworks.Example
 
         private void OnClickLoginApple()
         {
+            isThirdPartyLogin = true;
             PrototypeAPI.LoginApple(
                 (result) =>
                 {
@@ -207,7 +224,21 @@ namespace Mintzuworks.Example
         }
         public void OnGeneralError(ErrorResult error)
         {
-            Debug.LogError($"[{error.httpCode}] -> {error.error}");
+            Debug.LogError($"[{error.httpCode}] -> {error.message}");
+        }
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (focus)
+            {
+                //Debug.Log("After login you can make pool here to automatically logged in!");
+                if (isThirdPartyLogin)
+                {
+                    isThirdPartyLogin = false;
+                    OnClickVerifySocialAuth();
+                }
+                //You can m
+            }
         }
     }
 }

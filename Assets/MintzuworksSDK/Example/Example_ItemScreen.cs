@@ -23,6 +23,7 @@ namespace Mintzuworks.Example
         public Button btnDrawPrize;
 
         public Button btnRefreshInventory;
+        public Button btnRefreshInventoryAggregate;
         public Button btnSubstractItemInstance;
         public Button btnLogout;
 
@@ -38,6 +39,7 @@ namespace Mintzuworks.Example
             btnSellItem.onClick.AddListener(OnClickSellItem);
             btnDrawPrize.onClick.AddListener(OnClickDrawPrize);
             btnRefreshInventory.onClick.AddListener(OnClickRefreshInventory);
+            btnRefreshInventoryAggregate.onClick.AddListener(OnClickRefreshInventoryAggregate);
             btnSubstractItemInstance.onClick.AddListener(OnClickSubstractItemInstance);
             btnLogout.onClick.AddListener(OnClickLogout);
 
@@ -190,11 +192,25 @@ namespace Mintzuworks.Example
             RefreshInventoryListing();
         }
 
+        private void OnClickRefreshInventoryAggregate()
+        {
+            PrototypeAPI.GetInventoryAggregate((result) =>
+            {
+                currentInventory = result.data;
+                DestroyAllChildren(layoutInventory.transform);
+                foreach (var item in result.data)
+                {
+                    var inventory = Instantiate(inventoryPrefab, layoutInventory.transform);
+                    inventory.SetInfo(item.itemID, item.amount.ToString());
+                }
+
+                StartCoroutine(LateDirty());
+            }, OnGeneralError);
+        }
+
         private void OnClickLogout()
         {
-            PrototypeHttp.accessToken = string.Empty;
-            PrototypeHttp.refreshToken = string.Empty;
-            SceneManager.LoadScene("AuthScreen");
+            SceneManager.LoadScene("UserScreen");
         }
 
         public void OnGeneralResult(GeneralResult result)

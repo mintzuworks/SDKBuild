@@ -96,7 +96,7 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class LinkedAccountsDictionary : CommonResult
     {
-        public Dictionary<string, LinkedAccountInfo> linkedAccounts;
+        public Dictionary<string, LinkedAccountInfo> data = new Dictionary<string, LinkedAccountInfo>();
     }
 
     [System.Serializable]
@@ -147,6 +147,12 @@ namespace Mintzuworks.Domain
         Other
     }
 
+    public enum SocialProvider
+    {
+        Google,
+        Apple,
+        DeviceID
+    }
 
     [System.Serializable]
     public class GetClaimedCouponsResult : CommonResult
@@ -201,6 +207,7 @@ namespace Mintzuworks.Domain
     public class GuestLoginRequest
     {
         public string deviceID;
+        public bool autoSignup = true;
     }
 
     [System.Serializable]
@@ -210,6 +217,11 @@ namespace Mintzuworks.Domain
         public string refreshToken;
     }
 
+    [System.Serializable]
+    public class CheckSocialRedisLinkResponse : CommonResult
+    {
+        public bool result;
+    }
 
     [System.Serializable]
     public class GetBanInfoResult : CommonResult
@@ -262,6 +274,84 @@ namespace Mintzuworks.Domain
         public List<ItemExchangeReadable> itemData;
     }
 
+
+    [System.Serializable]
+    public class ValidatePlayStoreRequest
+    {
+        public string package;
+        public string productID;
+        public string purchaseToken;
+    }
+    [System.Serializable]
+    public class ValidateAppStoreRequest
+    {
+        public string receiptData;
+        public string password;
+        public bool excludeOldTransactions;
+    }
+    [System.Serializable]
+    public class InitiatePaypalOrderRequest
+    {
+        public string productID;
+    }
+
+    [System.Serializable]
+    public class InitiatePaypalOrderResult : CommonResult
+    {
+        public string orderID;
+    }
+
+    [System.Serializable]
+    public class ValidateAppStoreResult : CommonResult
+    {
+        public string transactionID;
+        public string originalTransactionId;
+        public string webOrderLineItemId;
+        public string bundleId;
+        public string productId;
+        public string subscriptionGroupIdentifier;
+        public long purchaseDate;
+        public long originalPurchaseDate;
+        public long expiresDate;
+        public int quantity;
+        public string type;
+        public string appAccountToken;
+        public string inAppOwnershipType;
+        public long signedDate;
+        public int offerType;
+        public string offerIdentifier;
+        public long revocationDate;
+        public int? revocationReason;
+        public bool isUpgraded;
+        public string storefront;
+        public string storefrontId;
+        public string transactionReason;
+        public string environment;
+        public int price;
+        public string currency;
+        public string offerDiscountType;
+    }
+
+    [System.Serializable]
+    public class ValidatePlayStoreResult : CommonResult
+    {
+        public long acknowledgementState;
+        public long consumptionState;
+        public string developerPayload;
+        public string kind;
+        public string obfuscatedExternalAccountId;
+        public string obfuscatedExternalProfileId;
+        public string orderId;
+        public string productId;
+        public long purchaseState;
+        public string purchaseTimeMillis;
+        public string purchaseToken;
+        public long? purchaseType;
+        public long quantity;
+        public string regionCode;
+    }
+
+
     [System.Serializable]
     public class DrawPrizeRequest
     {
@@ -278,13 +368,15 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class SocialLoginRequest
     {
-        public string token;
+        public string id;
     }
 
-    [System.Serializable]
-    public class SocialLinkingRequest
+    [Serializable]
+    public class StartAuthenticationRequest
     {
-        public string token;
+        public string deviceID;
+        public string eventName;
+        public string userID;
     }
 
     [System.Serializable]
