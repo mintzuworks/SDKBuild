@@ -44,20 +44,48 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         SceneManager.LoadScene("UserScreen");
     }
 
+    string currentOrder;
+    bool paypalOrder;
     private void OnClickInitiatePaypalOrder()
     {
+        paypalOrder = true;
         PrototypeAPI.InitiatePaypalOrder(new InitiatePaypalOrderRequest
         {
             productID = productInput.text
+        }, (result) =>
+        {
+            currentOrder = result.orderID;
         }, OnError: OnGeneralError);
     }
 
+    private void OnApplicationFocus(bool focus)
+    {
+        OnClickCheckPaypalState();
+    }
     public void OnGeneralError(ErrorResult error)
     {
         Debug.LogError($"[{error.httpCode}] -> {error.message}");
     }
     private void OnClickCheckPaypalState()
     {
+        if (!paypalOrder) return;
+        PrototypeAPI.VerifyPaypalTransaction(new VerifyPaypalTransactionRequest()
+        {
+            orderID = currentOrder,
+        }, (result) =>
+        {
+            Debug.Log($"[Paypal] Order State : {result.status}");
+            switch (result.status)
+            {
+                case "completed":
+                    paypalOrder = false;
+                    break;
+
+                case "cancelled":
+                    paypalOrder = false;
+                    break;
+            }
+        }, OnGeneralError);
     }
 
     void InitializePurchasing()

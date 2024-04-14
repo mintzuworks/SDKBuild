@@ -296,6 +296,16 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
+    public class VerifyPaypalTransactionRequest
+    {
+        public string orderID;
+    }
+    [System.Serializable]
+    public class VerifyPaypalTransactionResult : CommonResult
+    {
+        public string status;
+    }
+    [System.Serializable]
     public class InitiatePaypalOrderResult : CommonResult
     {
         public string orderID;

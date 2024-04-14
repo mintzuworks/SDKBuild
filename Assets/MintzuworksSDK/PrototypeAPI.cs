@@ -71,6 +71,7 @@ namespace Mintzuworks.Network
         private const string ValidatePlayStoreTransactionURL = "iap/validate/playStore";
         private const string ValidateAppStoreTransactionURL = "iap/validate/appStore";
         private const string InitiatePaypalOrderURL = "iap/paypal/initiate";
+        private const string VerifyPaypalTransactionURL = "iap/paypal/pool";
         #endregion
 
 
@@ -346,6 +347,11 @@ namespace Mintzuworks.Network
                         Application.OpenURL($"https://www.sandbox.paypal.com/checkoutnow?token={result.orderID}");
                     }
                 }, OnError);
+        }
+
+        public static void VerifyPaypalTransaction(VerifyPaypalTransactionRequest request, Action<VerifyPaypalTransactionResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Post(BaseURL + VerifyPaypalTransactionURL, request, OnSuccess, OnError);
         }
         #endregion
     }
