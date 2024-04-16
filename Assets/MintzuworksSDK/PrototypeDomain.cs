@@ -32,6 +32,13 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
+    public class GetCustomDataByKeyRequest
+    {
+        public List<string> keys;
+    }
+
+
+    [System.Serializable]
     public class GetGameDataByKeyRequest : CommonResult
     {
         public List<string> keys;
@@ -170,13 +177,13 @@ namespace Mintzuworks.Domain
     [System.Serializable]
     public class GetPrizeTableProgressionResult : CommonResult
     {
-        public List<PrizeTableProgression> Result;
+        public List<PrizeTableProgression> data;
     }
 
     [System.Serializable]
     public class GetPurchaseHistoryResult : CommonResult
     {
-        public List<PurchaseHistory> Result;
+        public List<PurchaseHistory> data;
     }
 
     [System.Serializable]

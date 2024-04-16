@@ -243,9 +243,9 @@ namespace Mintzuworks.Network
             PrototypeHttp.Get(BaseURL + GetLinkedAccountsURL, OnSuccess, OnError);
         }
 
-        public static void GetCustomData(Action<GetCustomDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        public static void GetCustomData(GetCustomDataByKeyRequest request, Action<GetCustomDataResult> OnSuccess = null, Action<ErrorResult> OnError = null)
         {
-            PrototypeHttp.Get(BaseURL + GetCustomDataURL, OnSuccess, OnError);
+            PrototypeHttp.Post(BaseURL + GetCustomDataURL, request, OnSuccess, OnError);
         }
 
         public static void GetClaimedCoupons(Action<GetClaimedCouponsResult> OnSuccess = null, Action<ErrorResult> OnError = null)

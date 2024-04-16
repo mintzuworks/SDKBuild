@@ -21,6 +21,7 @@ namespace Mintzuworks.Example
         public Button btnRefreshToken;
         public Button btnCheckSSO;
         public Button btnGoToItemManagement;
+        public Button btnGoToUserManagement;
 
         public Button btnLinkWithGoogle;
         public Button btnLinkWithApple;
@@ -40,6 +41,7 @@ namespace Mintzuworks.Example
             btnCheckSSO.onClick.AddListener(OnClickCheckSSO);
             btnLogout.onClick.AddListener(OnClickLogout);
             btnGoToItemManagement.onClick.AddListener(OnClickGoToItemManagement);
+            btnGoToUserManagement.onClick.AddListener(OnClickGoToUserManagement);
 
             btnLinkWithGoogle.onClick.AddListener(OnClickLinkWithGoogle);
             btnLinkWithApple.onClick.AddListener(OnClickLinkWithApple);
@@ -50,6 +52,11 @@ namespace Mintzuworks.Example
 
             GetUserInfo();
             GetLinkedAccounts();
+        }
+
+        private void OnClickGoToUserManagement()
+        {
+            SceneManager.LoadScene("UserManagementScreen");
         }
 
         private void GoToIAP()

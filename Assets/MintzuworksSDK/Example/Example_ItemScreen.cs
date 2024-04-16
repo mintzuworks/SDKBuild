@@ -1,5 +1,6 @@
 using Mintzuworks.Domain;
 using Mintzuworks.Network;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -132,7 +133,7 @@ namespace Mintzuworks.Example
 
         private void OnClickBuyItem()
         {
-            PrototypeAPI.BuyItem(new ItemManagementRequest()
+            var req = new ItemManagementRequest()
             {
                 itemData = new List<ItemExchangeReadable>()
                 {
@@ -142,7 +143,10 @@ namespace Mintzuworks.Example
                         amount = int.Parse(inputItemAmount.text),
                     }
                 }
-            },
+            };
+
+            Debug.Log("[Test] => " + JsonConvert.SerializeObject(req));
+            PrototypeAPI.BuyItem(req,
             (result) =>
             {
                 OnGeneralResult(result);
