@@ -12,7 +12,7 @@ using UnityEngine.UI;
 namespace Mintzuworks.Example
 {
     public class Example_UserScreen : MonoBehaviour
-    {
+    {/*
         public TextMeshProUGUI txtUserID;
         public TextMeshProUGUI txtDisplayName;
         public TMP_InputField inputNewDisplayName;
@@ -66,7 +66,7 @@ namespace Mintzuworks.Example
 
         private void OnClickUnlinkGoogle()
         {
-            PrototypeAPI.SocialUnlinking(new SocialUnlinkingRequest()
+            ClientAPI.SocialUnlinking(new SocialUnlinkingRequest()
             {
                 provider = SocialProvider.Google.ToString().ToLower(),
             },
@@ -80,7 +80,7 @@ namespace Mintzuworks.Example
 
         private void OnClickUnlinkApple()
         {
-            PrototypeAPI.SocialUnlinking(new SocialUnlinkingRequest()
+            ClientAPI.SocialUnlinking(new SocialUnlinkingRequest()
             {
                 provider = SocialProvider.Apple.ToString().ToLower(),
             },
@@ -101,7 +101,7 @@ namespace Mintzuworks.Example
                 eventName = "link",
                 userID = currentUser.userID,
             };
-            PrototypeAPI.LinkGoogle(request);
+            ClientAPI.LinkGoogle(request);
         }
 
         private void OnClickLinkWithApple()
@@ -113,7 +113,7 @@ namespace Mintzuworks.Example
                 eventName = "link",
                 userID = currentUser.userID,
             };
-            PrototypeAPI.LinkApple(request);
+            ClientAPI.LinkApple(request);
         }
 
         private void OnApplicationFocus(bool focus)
@@ -132,7 +132,7 @@ namespace Mintzuworks.Example
         bool isLinkToThirdParty;
         private void OnClickVerifyLink()
         {
-            PrototypeAPI.SocialLink(new SocialLoginRequest()
+            ClientAPI.SocialLink(new SocialLoginRequest()
             {
                 id = currentUser.userID,
             }, 
@@ -158,7 +158,7 @@ namespace Mintzuworks.Example
 
         private void OnClickCheckSSO()
         {
-            PrototypeAPI.GetUserInfo((result) =>
+            ClientAPI.GetUserInfo((result) =>
             {
                 if (result.lastDeviceID != SystemInfo.deviceUniqueIdentifier)
                 {
@@ -175,7 +175,7 @@ namespace Mintzuworks.Example
 
         private void GetUserInfo()
         {
-            PrototypeAPI.GetUserInfo((result) =>
+            ClientAPI.GetUserInfo((result) =>
             {
                 txtDisplayName.text = "Display Name : " + result.displayName;
                 txtUserID.text = "User ID : " + result.userID;
@@ -185,7 +185,7 @@ namespace Mintzuworks.Example
 
         private void GetLinkedAccounts()
         {
-            PrototypeAPI.GetLinkedAccounts((result) =>
+            ClientAPI.GetLinkedAccounts((result) =>
             {
                 if (result.data == null) return;
 
@@ -202,7 +202,7 @@ namespace Mintzuworks.Example
         }
         private void OnClickUpdateDisplayName()
         {
-            PrototypeAPI.UpdateDisplayName(new UpdateDisplayNameRequest()
+            ClientAPI.UpdateDisplayName(new UpdateDisplayNameRequest()
             {
                 displayName = inputNewDisplayName.text,
             }, (result) =>
@@ -220,7 +220,7 @@ namespace Mintzuworks.Example
                 return;
             }
 
-            PrototypeAPI.SendResetPassword(new EmailRequest()
+            ClientAPI.SendResetPassword(new EmailRequest()
             {
                 email = currentUser.email,
             }, OnGeneralResult, OnGeneralError);
@@ -228,7 +228,7 @@ namespace Mintzuworks.Example
 
         private void OnClickRefreshToken()
         {
-            PrototypeAPI.RefreshAccessToken(new RefreshTokenRequest()
+            ClientAPI.RefreshAccessToken(new RefreshTokenRequest()
             {
                 refreshToken = PrototypeHttp.refreshToken,
             }, (result) =>
@@ -252,6 +252,6 @@ namespace Mintzuworks.Example
         public void OnGeneralError(ErrorResult error)
         {
             Debug.LogError($"[{error.httpCode}] -> {error.message}");
-        }
+        }*/
     }
 }
