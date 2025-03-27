@@ -65,6 +65,7 @@ namespace Mintzuworks.Network
         private const string BuyItemURL = "item/buy/id";
         private const string SellItemURL = "item/sell/id";
         private const string DrawPrizeURL = "prizeTable/draw";
+        private const string UpdateCustomJsonURL = "item/updateCustomJson";
         #endregion
 
         #region IAP URL
@@ -324,6 +325,11 @@ namespace Mintzuworks.Network
         {
             PrototypeHttp.Post(BaseURL + DrawPrizeURL, request, OnSuccess, OnError);
         }
+
+        public static void UpdateCustomJson(UpdateCustomJsonRequest request, Action<GeneralResult> OnSuccess = null, Action<ErrorResult> OnError = null)
+        {
+            PrototypeHttp.Put(BaseURL + UpdateCustomJsonURL, request, OnSuccess, OnError);
+        }
         #endregion
 
         #region IAP API
@@ -342,7 +348,7 @@ namespace Mintzuworks.Network
                 {
                     OnSuccess?.Invoke(result);
 
-                    if(!string.IsNullOrEmpty(result.orderID))
+                    if (!string.IsNullOrEmpty(result.orderID))
                     {
                         Application.OpenURL($"https://www.sandbox.paypal.com/checkoutnow?token={result.orderID}");
                     }
