@@ -1,4 +1,3 @@
-using I2.Loc;
 using Mintzuworks.Domain;
 using Mintzuworks.Network;
 using Sirenix.OdinInspector;
@@ -368,10 +367,10 @@ namespace Mintzuworks.FakeSample
         }
         public string GetItemTranslation(string itemID)
         {
-            var temp = LocalizationManager.GetTranslation($"item/{itemID}/title");
-            if (string.IsNullOrEmpty(temp))
-                temp = itemID;
-            return temp;
+            // var temp = LocalizationManager.GetTranslation($"item/{itemID}/title");
+            // if (string.IsNullOrEmpty(temp))
+            //     temp = itemID;
+            return itemID;
         }
         public string GetIconPath(string itemID)
         {

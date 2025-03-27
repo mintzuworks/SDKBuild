@@ -424,15 +424,6 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
-    public class UpdateCustomJsonRequest
-    {
-        public string InstanceID;
-        public string ItemID;
-        public string Mode;
-        public Dictionary<string, object>;
-    }
-
-    [System.Serializable]
     public class SocialLoginRequest
     {
         public string id;
