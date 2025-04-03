@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "displayName": "Mintzuworks SDK",
     "description": "Tools and systems for Unity projects.",
-    "unity": "6000.0.31f1",
+    "unity": "6000.",
     "author": {
         "name": "Mintzuworks",
         "url": "https://github.com/mintzuworks"
