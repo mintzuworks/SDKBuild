@@ -36,6 +36,16 @@ namespace Mintzuworks.Network
         private const string SendResetPasswordURL = "resetpass/send";
         #endregion
 
+        #region Web3
+        private const string RequestNonceURL = "nonce/request";
+        private const string LoginWeb3URL = "login/web3";
+        #endregion
+
+        #region Match
+        private const string StartMatchURL = "startMatch";
+        private const string EndMatchURL = "endMatch";
+        #endregion
+
         #region Email Verification URL
         private const string CheckEmailAvailibilityURL = "emailverificaton/check";
         private const string SendEmailVerificationCodeURL = "emailverificaton/send";
@@ -53,11 +63,14 @@ namespace Mintzuworks.Network
         private const string GetInventoryURL = "user/inventory";
         private const string GetInventoryAggregateURL = "user/inventory/aggregate";
         private const string GetPurchaseHistoryURL = "user/purchaseHistory";
-        private const string GetLeaderboardDataURL = "user/leaderboardData";
         private const string GetMailInboxURL = "user/mailInbox";
         private const string GetPrizeTableProgressionURL = "user/prizeTableProgression";
         private const string UpdateDisplayNameURL = "user/displayName";
         private const string UpdateCustomDataByKeyURL = "user/customData";
+        #endregion
+
+        #region Leaderboard URL
+        private const string GetLeaderboardEntryURL = "leaderboard/entries";
         #endregion
 
         #region Item Management URL 
@@ -70,6 +83,8 @@ namespace Mintzuworks.Network
         private const string DrawPrizeURL = "prizeTable/draw";
         private const string GetItemByID = "items/id";
         private const string GetItemByOID = "items/oid";
+        private const string UpdateCustomJsonURL = "item/updateCustomJson";
+        
 
         #region Admin Item Management URL
         private const string CatalogueItemURL = "item";
@@ -222,6 +237,30 @@ namespace Mintzuworks.Network
         }
         #endregion
 
+        #region Web3
+        public static async UniTask<NonceResult> RequestNonce(NonceRequest request)
+        {
+            return await PrototypeHttp.Post<NonceRequest, NonceResult>(BaseURL + RequestNonceURL, request, useOAuth: false);
+        }
+
+        public static async UniTask<LoginResponse> LoginWeb3(LoginWeb3Request request)
+        {
+            return await PrototypeHttp.Post<LoginWeb3Request, LoginResponse>(BaseURL + LoginWeb3URL, request, useOAuth: false);
+        }
+        #endregion
+
+        #region Match API
+        public static async UniTask<MatchResult> StartMatch(StartMatchRequest request)
+        {
+            return await PrototypeHttp.Post<StartMatchRequest, MatchResult>(BaseURL + StartMatchURL, request);
+        }
+
+        public static async UniTask<MatchResult> EndMatch(EndMatchRequest request)
+        {
+            return await PrototypeHttp.Post<EndMatchRequest, MatchResult>(BaseURL + EndMatchURL, request, isCrucial: true);
+        }
+        #endregion
+
         #region Email Verification API
         public static async UniTask<GeneralResult> CheckEmailAvailability(EmailRequest request)
         {
@@ -272,6 +311,11 @@ namespace Mintzuworks.Network
         public static async UniTask<GeneralResult> UpdateCustomDataByKey(UpdateGameDataByKeyRequest request)
         {
             return await PrototypeHttp.Put<UpdateGameDataByKeyRequest, GeneralResult>(BaseURL + UpdateCustomDataByKeyURL, request);
+        }
+
+        public static async UniTask<GeneralResult> UpdateCustomJson(UpdateCustomJsonRequest request)
+        {
+            return await PrototypeHttp.Put<UpdateCustomJsonRequest, GeneralResult>(BaseURL + UpdateCustomJsonURL, request);
         }
 
         public static async UniTask<GetClaimedCouponsResult> GetClaimedCoupons()
@@ -344,10 +388,19 @@ namespace Mintzuworks.Network
         {
             return await PrototypeHttp.Post<DrawPrizeRequest, DrawPrizeResult>(BaseURL + DrawPrizeURL, request);
         }
-        public static async UniTask<GetAllItemResult> GetAllItem()
+        public static async UniTask<GetAllItemResult> GetAllCatalogueItem()
         {
             return await PrototypeHttp.Get<GetAllItemResult>(BaseURL + GetAllCatalogueItemURL);
         }
+        #endregion
+
+        #region Leaderboard
+        public static async UniTask<GetLeaderboardResult> GetLeaderboardEntry(GetLeaderboardRequest request)
+        {
+            string url = $"{BaseURL}{GetLeaderboardEntryURL}?name={request.statisticName}&version={request.version}";
+            return await PrototypeHttp.Get<GetLeaderboardResult>(url, useOAuth: false);
+        }
+
         #endregion
 
         #region IAP API

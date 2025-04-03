@@ -74,5 +74,10 @@ namespace Mintzuworks.Utils
             return response;
         }
 
+
+        public static long TimeEpoch()
+        {
+            return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+        }
     }
 }

@@ -104,7 +104,7 @@ namespace Mintzuworks.FakeSample
             selectors.Clear();
             DestroyAllChild(targetItemListWidget);
             OnShow?.Invoke();
-            var result = await ClientAPI.GetAllItem();
+            var result = await ClientAPI.GetAllCatalogueItem();
             OnHide?.Invoke();
 
             if (result != null && result.httpCode == (int)HttpStatusCode.OK)
@@ -326,7 +326,7 @@ namespace Mintzuworks.FakeSample
                 x.SetHighlight(false);
             });
             selectorUI.SetHighlight(true);
-            
+
             var find = allItemData.Find(x => x.ID == id);
             if (find != null)
             {
