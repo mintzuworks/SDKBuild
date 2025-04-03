@@ -1,9 +1,6 @@
 using Newtonsoft.Json;
-using PlayFab.EconomyModels;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Mintzuworks.Domain
 {
@@ -27,9 +24,9 @@ namespace Mintzuworks.Domain
     }
 
     [System.Serializable]
-    public class GeneralResultWithData : CommonResult
+    public class GeneralResultWithData<T> : CommonResult
     {
-        public object data;
+        public T data;
     }
 
     [System.Serializable]
@@ -211,6 +208,29 @@ namespace Mintzuworks.Domain
     {
         public string email;
     }
+
+    [System.Serializable]
+    public class NonceRequest
+    {
+        public string walletAddress;
+    }
+
+    [System.Serializable]
+    public class NonceResult : CommonResult
+    {
+        public string nonce;
+    }
+
+    //Login Web3 Request
+    [System.Serializable]
+    public class LoginWeb3Request
+    {
+        public string walletAddress;
+        public string nonce;
+        public string signature;
+        public string deviceID;
+    }
+
     [System.Serializable]
     public class GuestLoginRequest
     {
@@ -248,6 +268,7 @@ namespace Mintzuworks.Domain
     public class GetUserInfoResult : CommonResult
     {
         public string userID;
+        public string customID;
         public string displayName;
         public string email;
         public string region;
@@ -279,27 +300,72 @@ namespace Mintzuworks.Domain
     {
         public List<CatalogueItem> data;
     }
+
     [Serializable]
     public class CatalogueItem
     {
         [JsonProperty("_id")]
         public string ID { get; set; }
+
+        [JsonProperty("itemID")]
         public string ItemID { get; set; }
+
+        [JsonProperty("description")]
         public string Description { get; set; }
+
+        [JsonProperty("type")]
         public string Type { get; set; }
+
+        [JsonProperty("isStackable")]
         public bool IsStackable { get; set; }
+
+        [JsonProperty("isRechargeable")]
         public bool IsRechargeable { get; set; }
-        public int StartingAmount { get; set; } // IF STACKABLE ONLY
-        public int MaxAmount { get; set; } // IF STACKABLE ONLY
-        public int RechargeRate { get; set; } // IF RECHARGEABLE && STACKABLE ONLY
-        public int MaxRecharge { get; set; } // IF RECHARGEABLE && STACKABLE ONLY
+
+        [JsonProperty("startingAmount")]
+        public int StartingAmount { get; set; }
+
+        [JsonProperty("maxAmount")]
+        public int MaxAmount { get; set; }
+
+        [JsonProperty("rechargeRate")]
+        public int RechargeRate { get; set; }
+
+        [JsonProperty("rechargeIntervalType")]
+        public int RechargeIntervalType { get; set; } // Assuming enum is int
+
+        [JsonProperty("rechargeInterval")]
+        public int RechargeInterval { get; set; }
+
+        [JsonProperty("maxRecharge")]
+        public int MaxRecharge { get; set; }
+
+        [JsonProperty("buyPrice")]
         public List<ItemExchange> BuyPrice { get; set; }
+
+        [JsonProperty("customSellPrice")]
         public List<ItemExchange> CustomSellPrice { get; set; }
+
+        [JsonProperty("customJSON")]
         public Dictionary<string, object> CustomJSON { get; set; }
 
+        [JsonProperty("isOnAccountCreation")]
+        public bool IsOnAccountCreation { get; set; }
+
+        [JsonProperty("isOnAccountCreationAmt")]
+        public int IsOnAccountCreationAmt { get; set; }
+
+        [JsonProperty("enableStatistic")]
+        public bool EnableStatistic { get; set; }
+
+        [JsonProperty("statisticType")]
+        public int StatisticType { get; set; } // Assuming enum is int
+
         // Uncomment if needed
-        // public int DurableDuration { get; set; } // IF DURABLE ONLY
+        // [JsonProperty("durableDuration")]
+        // public int DurableDuration { get; set; }
     }
+
 
 
     [Serializable]
@@ -442,5 +508,17 @@ namespace Mintzuworks.Domain
     {
         public string provider;
     }
+
+    
+
+    [System.Serializable]
+    public class UpdateCustomJsonRequest
+    {
+        public string instanceID;
+        public string itemID;
+        public string mode;
+        public Dictionary<string, object> data;
+    }
+
 
 }

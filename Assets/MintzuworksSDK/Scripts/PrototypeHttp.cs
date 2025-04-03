@@ -18,7 +18,7 @@ namespace Mintzuworks.Network
         private const string content_length = "Content-Length";
         private const string application_json = "application/json";
         private const string application_octet_stream = "application/octet-stream";
-        private const string x_auth = "x-auth";
+        private const string x_sign = "X-Signature";
         private const string x_permission = "x-permission";
 
         public static string x_auth_key;
@@ -33,27 +33,26 @@ namespace Mintzuworks.Network
         {
             { content_type, application_json },
         };
-        private static RestParameters CreateHeader(bool isOAuth, bool isCrucial)
+
+        private static RestParameters CreateHeader<T>(bool isOAuth, bool isCrucial, T request)
         {
             if (!isOAuth && !isCrucial) return null;
 
             if (isCrucial)
             {
-                var reqHeader = new PermissionData
+                var reqHeader = new SignedData<T>
                 {
-                    timestamp = DateTime.Now,
-                    nonce = PrototypeUtils.GenerateRandomCode(16)
+                    time = PrototypeUtils.TimeEpoch(),
+                    data = request
                 };
-                var json = JsonConvert.SerializeObject(reqHeader);
-                var enc = PrototypeUtils.EncryptToBase64(json, x_permission_key);
 
-                Headers[x_auth] = x_auth_key;
-                Headers[x_permission] = enc;
+                var json = JsonConvert.SerializeObject(reqHeader);
+                var encrypted = AesCFBUtil.EncryptToBase64(json, accessToken);
+                Headers[x_sign] = encrypted;
             }
             else
             {
-                Headers.Remove(x_auth);
-                Headers.Remove(x_permission);
+                Headers.Remove(x_sign);
             }
 
             if (isOAuth)
@@ -66,7 +65,6 @@ namespace Mintzuworks.Network
                 Headers.Remove(authorization);
                 Headers.Remove(device);
             }
-
             return new RestParameters(Headers);
         }
 
@@ -76,7 +74,7 @@ namespace Mintzuworks.Network
             where TResult : CommonResult, new()
         {
             // Create the headers for the request
-            RestParameters restParameters = CreateHeader(useOAuth, isCrucial);
+            RestParameters restParameters = CreateHeader(useOAuth, isCrucial, body);
 
             // Await the PostAsync call, which returns a Task<Response>
             var response = await Rest.PutAsync(url, JsonConvert.SerializeObject(body), parameters: restParameters);
@@ -85,14 +83,13 @@ namespace Mintzuworks.Network
             return ProcessResponse<TResult>(response);
         }
 
-
         // POST method refactored to use UniTask and return TResult directly
         public static async UniTask<TResult> Post<TRequest, TResult>(string url, TRequest body,
             bool useOAuth = true, bool isCrucial = false)
             where TResult : CommonResult, new()
         {
             // Create the headers for the request
-            RestParameters restParameters = CreateHeader(useOAuth, isCrucial);
+            RestParameters restParameters = CreateHeader(useOAuth, isCrucial, body);
 
             // Await the PostAsync call, which returns a Task<Response>
             var response = await Rest.PostAsync(url, JsonConvert.SerializeObject(body), parameters: restParameters);
@@ -105,7 +102,7 @@ namespace Mintzuworks.Network
         public static async UniTask<TResult> Get<TResult>(string url, bool useOAuth = true, bool isCrucial = false)
             where TResult : CommonResult, new()
         {
-            RestParameters restParameters = CreateHeader(useOAuth, isCrucial);
+            RestParameters restParameters = CreateHeader(useOAuth, isCrucial, default(TResult));
 
             // Await the GetAsync call
             var response = await Rest.GetAsync(url, parameters: restParameters);
@@ -137,12 +134,6 @@ namespace Mintzuworks.Network
                 httpCode = response.Code,
             };
         }
-    }
-
-    public class PermissionData
-    {
-        public DateTime timestamp;
-        public string nonce;
     }
 }
 public class ResponseException : Exception
